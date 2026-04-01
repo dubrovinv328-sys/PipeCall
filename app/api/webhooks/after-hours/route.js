@@ -15,7 +15,6 @@ var TWILIO_PHONE = process.env.TWILIO_PHONE_NUMBER;
 var SITE_URL = 'https://pipe-call.vercel.app';
 var BUSINESS_NAME = 'PipeCall Plumbing';
 
-var DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
 function isAfterHours(businessHours, timezone) {
   try {
