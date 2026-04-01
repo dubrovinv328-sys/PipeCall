@@ -1,51 +1,61 @@
 import { createClient } from '@supabase/supabase-js';
 import twilio from 'twilio';
 
-const supabase = createClient(
+var supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
 );
 
-const twilioClient = twilio(
+var twilioClient = twilio(
   process.env.TWILIO_ACCOUNT_SID,
   process.env.TWILIO_AUTH_TOKEN
 );
 
-const TWILIO_PHONE = process.env.TWILIO_PHONE_NUMBER;
-const SITE_URL = 'https://pipe-call.vercel.app';
-
-const BUSINESS_NAME = 'PipeCall Plumbing';
+var TWILIO_PHONE = process.env.TWILIO_PHONE_NUMBER;
+var SITE_URL = 'https://pipe-call.vercel.app';
+var BUSINESS_NAME = 'PipeCall Plumbing';
 
 export async function POST(request) {
   try {
-    const formData = await request.formData();
-    const callStatus = formData.get('CallStatus');
-    const callerPhone = formData.get('From');
+    var formData = await request.formData();
+    var callStatus = formData.get('CallStatus');
+    var callerPhone = formData.get('From');
 
-    console.log(`Call status received: ${callStatus} from ${callerPhone}`);
+    console.log('Call status received: ' + callStatus + ' from ' + callerPhone);
 
     if (callStatus !== 'no-answer' && callStatus !== 'busy') {
       return new Response('OK — not a missed call', { status: 200 });
     }
 
-    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+    var twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
 
-    const { data: recentLeads } = await supabase
+    var { data: recentLeads } = await supabase
       .from('leads')
       .select('id')
       .eq('caller_phone', callerPhone)
       .gte('created_at', twoMinutesAgo);
 
     if (recentLeads && recentLeads.length > 0) {
-      console.log(`Duplicate call from ${callerPhone} — skipping SMS`);
+      console.log('Duplicate call from ' + callerPhone + ' — skipping SMS');
       return new Response('OK — duplicate suppressed', { status: 200 });
     }
 
-    const { data: lead, error: leadError } = await supabase
+    var { data: previousLeads } = await supabase
+      .from('leads')
+      .select('id, customer_name')
+      .eq('caller_phone', callerPhone)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    var isRepeat = previousLeads && previousLeads.length > 0;
+    var previousName = isRepeat ? previousLeads[0].customer_name : null;
+
+    var { data: lead, error: leadError } = await supabase
       .from('leads')
       .insert({
         caller_phone: callerPhone,
         status: 'new',
+        is_repeat_customer: isRepeat,
       })
       .select()
       .single();
@@ -55,24 +65,36 @@ export async function POST(request) {
       return new Response('Error creating lead', { status: 500 });
     }
 
-    console.log(`Lead created: ${lead.id}`);
+    console.log('Lead created: ' + lead.id);
 
     await supabase.from('events').insert({
       lead_id: lead.id,
       event_type: 'missed_call',
-      event_data: { call_status: callStatus, caller_phone: callerPhone },
+      event_data: {
+        call_status: callStatus,
+        caller_phone: callerPhone,
+        is_repeat: isRepeat,
+      },
     });
 
-    const intakeLink = `${SITE_URL}/intake/${lead.id}`;
-    const smsBody = `Hi! Thanks for calling ${BUSINESS_NAME}. We're on a job right now. Tap here to tell us what you need: ${intakeLink}`;
+    var intakeLink = SITE_URL + '/intake/' + lead.id;
+    var smsBody = '';
 
-    const message = await twilioClient.messages.create({
+    if (isRepeat && previousName) {
+      smsBody = 'Hi ' + previousName + '! Thanks for calling ' + BUSINESS_NAME +
+        ' again. We are on a job right now. Tap here to tell us what you need: ' + intakeLink;
+    } else {
+      smsBody = 'Hi! Thanks for calling ' + BUSINESS_NAME +
+        '. We are on a job right now. Tap here to tell us what you need: ' + intakeLink;
+    }
+
+    var message = await twilioClient.messages.create({
       body: smsBody,
       from: TWILIO_PHONE,
       to: callerPhone,
     });
 
-    console.log(`SMS sent: ${message.sid}`);
+    console.log('SMS sent: ' + message.sid);
 
     await supabase.from('notification_logs').insert({
       lead_id: lead.id,
@@ -87,7 +109,7 @@ export async function POST(request) {
     await supabase.from('events').insert({
       lead_id: lead.id,
       event_type: 'sms_sent',
-      event_data: { message_sid: message.sid, sms_type: 'initial_sms' },
+      event_data: { message_sid: message.sid, sms_type: 'initial_sms', is_repeat: isRepeat },
     });
 
     return new Response('OK — SMS sent', { status: 200 });
