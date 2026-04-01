@@ -13,9 +13,7 @@ const twilioClient = twilio(
 
 const TWILIO_PHONE = process.env.TWILIO_PHONE_NUMBER;
 const SITE_URL = 'https://pipe-call.vercel.app';
-
-// Plumber's phone number — hardcoded for now, will come from database later
-const PLUMBER_PHONE = process.env.PLUMBER_PHONE || '+1XXXXXXXXXX';
+const PLUMBER_PHONE = process.env.PLUMBER_PHONE || '+10000000000';
 
 const EMERGENCY_KEYWORDS = [
   'flood', 'flooding', 'burst', 'sewage',
@@ -23,20 +21,21 @@ const EMERGENCY_KEYWORDS = [
 ];
 
 function isEmergency(description, issueType) {
-  const text = `${description || ''} ${issueType || ''}`.toLowerCase();
-  return EMERGENCY_KEYWORDS.some(keyword => text.includes(keyword));
+  const text = (description || '') + ' ' + (issueType || '');
+  return EMERGENCY_KEYWORDS.some(function(keyword) {
+    return text.toLowerCase().includes(keyword);
+  });
 }
 
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { leadId } = body;
+    const leadId = body.leadId;
 
     if (!leadId) {
       return new Response('Missing leadId', { status: 400 });
     }
 
-    // Get the lead from Supabase
     const { data: lead, error: leadError } = await supabase
       .from('leads')
       .select('*')
@@ -44,56 +43,48 @@ export async function POST(request) {
       .single();
 
     if (leadError || !lead) {
-      console.error('Lead not found:', leadError);
       return new Response('Lead not found', { status: 404 });
     }
 
-    // Check if lead has intake data
     if (!lead.issue_type || !lead.customer_name) {
-      return new Response('Lead not ready — missing intake data', { status: 200 });
+      return new Response('Lead not ready', { status: 200 });
     }
 
-    // Check if photos exist
     const { data: photos } = await supabase
       .from('attachments')
       .select('id')
       .eq('lead_id', leadId);
 
     const hasPhotos = photos && photos.length > 0;
-    const leadLink = `${SITE_URL}/lead/${leadId}`;
+    const leadLink = SITE_URL + '/lead/' + leadId;
     const emergency = isEmergency(lead.description, lead.issue_type);
 
-    // Build the SMS
-    let smsBody;
+    var smsBody = '';
 
     if (emergency) {
-      smsBody = `🚨 EMERGENCY LEAD\n\n` +
-        `${lead.customer_name}\n` +
-        `Issue: ${lead.issue_type}\n` +
-        `${lead.description ? `Details: ${lead.description}\n` : ''}` +
-        `Time: ${lead.preferred_time || 'ASAP'}\n` +
-        `${hasPhotos ? '📷 Photos attached\n' : ''}` +
-        `\nTap to respond: ${leadLink}`;
+      smsBody = 'EMERGENCY LEAD\n\n' +
+        lead.customer_name + '\n' +
+        'Issue: ' + lead.issue_type + '\n' +
+        (lead.description ? 'Details: ' + lead.description + '\n' : '') +
+        'Time: ' + (lead.preferred_time || 'ASAP') + '\n' +
+        (hasPhotos ? 'Photos attached\n' : '') +
+        '\nTap to respond: ' + leadLink;
     } else {
-      smsBody = `New Lead\n\n` +
-        `${lead.customer_name}\n` +
-        `Issue: ${lead.issue_type}\n` +
-        `${lead.description ? `Details: ${lead.description}\n` : ''}` +
-        `Time: ${lead.preferred_time || 'Not specified'}\n` +
-        `${hasPhotos ? '📷 Photos attached\n' : ''}` +
-        `\nTap to respond: ${leadLink}`;
+      smsBody = 'New Lead\n\n' +
+        lead.customer_name + '\n' +
+        'Issue: ' + lead.issue_type + '\n' +
+        (lead.description ? 'Details: ' + lead.description + '\n' : '') +
+        'Time: ' + (lead.preferred_time || 'Not specified') + '\n' +
+        (hasPhotos ? 'Photos attached\n' : '') +
+        '\nTap to respond: ' + leadLink;
     }
 
-    // Send SMS to plumber
     const message = await twilioClient.messages.create({
       body: smsBody,
       from: TWILIO_PHONE,
       to: PLUMBER_PHONE,
     });
 
-    console.log(`Plumber notified: ${message.sid}`);
-
-    // Update lead status
     await supabase
       .from('leads')
       .update({
@@ -103,7 +94,6 @@ export async function POST(request) {
       })
       .eq('id', leadId);
 
-    // Log the notification
     await supabase.from('notification_logs').insert({
       lead_id: leadId,
       recipient_phone: PLUMBER_PHONE,
@@ -114,17 +104,19 @@ export async function POST(request) {
       status: 'sent',
     });
 
-    // Log the event
     await supabase.from('events').insert({
       lead_id: leadId,
       event_type: 'plumber_notified',
-      event_data: {
-        message_sid: message.sid,
-        is_emergency: emergency,
-      },
+      event_data: { message_sid: message.sid, is_emergency: emergency },
     });
 
     return new Response('OK — plumber notified', { status: 200 });
   } catch (error) {
     console.error('Notification error:', error);
-    return new Response('Server error', { st
+    return new Response('Server error', { status: 500 });
+  }
+}
+
+export async function GET() {
+  return new Response('Lead notification webhook is active', { status: 200 });
+}
