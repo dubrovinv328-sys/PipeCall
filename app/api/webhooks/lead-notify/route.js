@@ -13,7 +13,7 @@ const twilioClient = twilio(
 
 const TWILIO_PHONE = process.env.TWILIO_PHONE_NUMBER;
 const SITE_URL = 'https://pipe-call.vercel.app';
-const PLUMBER_PHONE = process.env.PLUMBER_PHONE || '+10000000000';
+const PLUMBER_PHONE = process.env.PLUMBER_PHONE || '971547674577';
 
 const EMERGENCY_KEYWORDS = [
   'flood', 'flooding', 'burst', 'sewage',
