@@ -265,7 +265,7 @@ async function rule5RepeatCaller() {
   return count;
 }
 
-export async function GET(request) {
+export async function GET() {
   try {
     var results = {
       reminders: await rule1ThirtyMinReminder(),
