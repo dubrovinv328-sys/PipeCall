@@ -12,7 +12,7 @@ var twilioClient = twilio(
 );
 
 var TWILIO_PHONE = process.env.TWILIO_PHONE_NUMBER;
-var BUSINESS_NAME = 'PipeCall Plumbing';
+var BUSINESS_NAME = 'WeKatch';
 
 export async function POST(request) {
   try {

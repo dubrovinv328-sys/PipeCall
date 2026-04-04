@@ -13,8 +13,8 @@ const twilioClient = twilio(
 
 const TWILIO_PHONE = process.env.TWILIO_PHONE_NUMBER;
 const PLUMBER_PHONE = process.env.PLUMBER_PHONE || '+10000000000';
-const SITE_URL = 'https://pipe-call.vercel.app';
-const BUSINESS_NAME = 'PipeCall Plumbing';
+const SITE_URL = 'https://wekatch.com';
+const BUSINESS_NAME = 'WeKatch';
 
 export async function POST(request) {
   try {

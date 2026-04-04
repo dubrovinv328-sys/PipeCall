@@ -14,8 +14,8 @@ var twilioClient = twilio(
 
 var TWILIO_PHONE = process.env.TWILIO_PHONE_NUMBER;
 var PLUMBER_PHONE = process.env.PLUMBER_PHONE || '+971547674577';
-var SITE_URL = 'https://pipe-call.vercel.app';
-var BUSINESS_NAME = 'PipeCall Plumbing';
+var SITE_URL = 'https://wekatch.com';
+var BUSINESS_NAME = 'WeKatch';
 
 async function rule1ThirtyMinReminder() {
   var thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
