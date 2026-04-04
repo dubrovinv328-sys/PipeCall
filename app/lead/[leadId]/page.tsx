@@ -64,7 +64,7 @@ function timeSince(dateStr: string): string {
   if (diff < 60) return `${diff}s ago`;
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
+  return new Date(dateStr).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
 function urgencyFromLead(lead: Lead): { label: string; color: string; bg: string } {
@@ -77,51 +77,32 @@ function urgencyFromLead(lead: Lead): { label: string; color: string; bg: string
   return { label: "Routine", color: "#374151", bg: "#e5e7eb" };
 }
 
-// ─── Photo Lightbox ───────────────────────────────────────────────────────────
 function Lightbox({ url, onClose }: { url: string; onClose: () => void }) {
   return (
-    <div onClick={onClose} style={{
-      position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      zIndex: 100, padding: "20px",
-    }}>
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: "20px" }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={url} alt="Full size" style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: 12, objectFit: "contain" }} />
-      <button onClick={onClose} style={{
-        position: "absolute", top: 16, right: 16, width: 36, height: 36,
-        borderRadius: "50%", background: "rgba(255,255,255,0.15)", border: "none",
-        color: "#fff", fontSize: 20, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-      }}>✕</button>
+      <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.15)", border: "none", color: "#fff", fontSize: 20, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
     </div>
   );
 }
 
-// ─── Offer Time Modal ─────────────────────────────────────────────────────────
-function OfferTimeModal({ onClose, onSend, sending }: {
-  onClose: () => void;
-  onSend: (day: string, window: string) => void;
-  sending: boolean;
-}) {
+function OfferTimeModal({ onClose, onSend, sending }: { onClose: () => void; onSend: (day: string, window: string) => void; sending: boolean; }) {
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [selectedWindow, setSelectedWindow] = useState<string | null>(null);
   const canSend = selectedDay && selectedWindow;
-
   const dayLabel = DAY_OPTIONS.find(d => d.id === selectedDay)?.label.toLowerCase();
   const windowLabel = TIME_WINDOW_OPTIONS.find(w => w.id === selectedWindow)?.label.toLowerCase();
 
   return (
-    <div onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 100 }}>
-      <div style={{ background: "#161a22", borderRadius: "20px 20px 0 0", border: "1px solid rgba(255,255,255,0.08)", width: "100%", maxWidth: 480, padding: "28px 20px 40px", animation: "slideUp 0.25s ease" }}>
-        <div style={{ width: 40, height: 4, background: "rgba(255,255,255,0.15)", borderRadius: 2, margin: "0 auto 24px" }} />
+    <div onClick={(e) => { if (e.target === e.currentTarget) onClose(); }} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20 }}>
+      <div style={{ background: "#161a22", borderRadius: 20, border: "1px solid rgba(255,255,255,0.08)", width: "100%", maxWidth: 480, padding: "28px 24px 32px", animation: "fadeUp 0.2s ease" }}>
         <h2 style={{ fontSize: 20, fontWeight: 800, color: "#f0f2f7", marginBottom: 6 }}>Offer a time</h2>
         <p style={{ fontSize: 14, color: "#7a8499", marginBottom: 24 }}>Customer gets an SMS with your time offer</p>
         <p style={{ fontSize: 12, fontWeight: 700, color: "#7a8499", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 10 }}>Which day?</p>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
           {DAY_OPTIONS.map((d) => (
-            <button key={d.id} onClick={() => setSelectedDay(d.id)} style={{ padding: "14px", borderRadius: 12, background: selectedDay === d.id ? "rgba(59,183,255,0.15)" : "#1e2330", border: `1.5px solid ${selectedDay === d.id ? "#3bb7ff" : "rgba(255,255,255,0.08)"}`, color: selectedDay === d.id ? "#3bb7ff" : "#e8eaf0", fontSize: 15, fontWeight: 700, cursor: "pointer", transition: "all 0.15s" }}>
-              {d.label}
-            </button>
+            <button key={d.id} onClick={() => setSelectedDay(d.id)} style={{ padding: "14px", borderRadius: 12, background: selectedDay === d.id ? "rgba(59,183,255,0.15)" : "#1e2330", border: `1.5px solid ${selectedDay === d.id ? "#3bb7ff" : "rgba(255,255,255,0.08)"}`, color: selectedDay === d.id ? "#3bb7ff" : "#e8eaf0", fontSize: 15, fontWeight: 700, cursor: "pointer", transition: "all 0.15s" }}>{d.label}</button>
           ))}
         </div>
         <p style={{ fontSize: 12, fontWeight: 700, color: "#7a8499", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 10 }}>What time?</p>
@@ -139,8 +120,7 @@ function OfferTimeModal({ onClose, onSend, sending }: {
             📱 SMS: <strong style={{ color: "#f0f2f7" }}>&quot;Your plumber can come {dayLabel} {windowLabel}. Reply YES to confirm.&quot;</strong>
           </div>
         )}
-        <button onClick={() => canSend && onSend(selectedDay!, selectedWindow!)} disabled={!canSend || sending}
-          style={{ width: "100%", padding: "17px", borderRadius: 14, background: canSend ? "#2563eb" : "#1e2330", border: "none", color: canSend ? "#fff" : "#4b5563", fontSize: 16, fontWeight: 800, cursor: canSend ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.15s" }}>
+        <button onClick={() => canSend && onSend(selectedDay!, selectedWindow!)} disabled={!canSend || sending} style={{ width: "100%", padding: "17px", borderRadius: 14, background: canSend ? "#2563eb" : "#1e2330", border: "none", color: canSend ? "#fff" : "#4b5563", fontSize: 16, fontWeight: 800, cursor: canSend ? "pointer" : "not-allowed", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.15s" }}>
           {sending ? <span style={{ width: 20, height: 20, border: "3px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.7s linear infinite", display: "inline-block" }} /> : "📨 Send Time Offer"}
         </button>
       </div>
@@ -148,13 +128,7 @@ function OfferTimeModal({ onClose, onSend, sending }: {
   );
 }
 
-// ─── Status Picker Modal ──────────────────────────────────────────────────────
-function StatusPickerModal({ current, onClose, onSelect, loading }: {
-  current: string;
-  onClose: () => void;
-  onSelect: (status: string) => void;
-  loading: boolean;
-}) {
+function StatusPickerModal({ current, onClose, onSelect, loading }: { current: string; onClose: () => void; onSelect: (status: string) => void; loading: boolean; }) {
   const options = [
     { id: "new",       emoji: "🔵", label: "New",        desc: "Back to new" },
     { id: "accepted",  emoji: "✅", label: "Accepted",   desc: "Job confirmed" },
@@ -164,22 +138,14 @@ function StatusPickerModal({ current, onClose, onSelect, loading }: {
   ];
 
   return (
-    <div onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 100 }}>
-      <div style={{ background: "#161a22", borderRadius: "20px 20px 0 0", border: "1px solid rgba(255,255,255,0.08)", width: "100%", maxWidth: 480, padding: "28px 20px 40px", animation: "slideUp 0.25s ease" }}>
-        <div style={{ width: 40, height: 4, background: "rgba(255,255,255,0.15)", borderRadius: 2, margin: "0 auto 24px" }} />
+    <div onClick={(e) => { if (e.target === e.currentTarget) onClose(); }} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20 }}>
+      <div style={{ background: "#161a22", borderRadius: 20, border: "1px solid rgba(255,255,255,0.08)", width: "100%", maxWidth: 440, padding: "28px 24px 32px", animation: "fadeUp 0.2s ease" }}>
         <h2 style={{ fontSize: 20, fontWeight: 800, color: "#f0f2f7", marginBottom: 6 }}>Update status</h2>
         <p style={{ fontSize: 14, color: "#7a8499", marginBottom: 20 }}>Current: <strong style={{ color: "#f0f2f7" }}>{STATUS_CONFIG[current]?.label ?? current}</strong></p>
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {options.map((opt) => (
             <button key={opt.id} onClick={() => onSelect(opt.id)} disabled={loading || opt.id === current}
-              style={{
-                display: "flex", alignItems: "center", gap: 14, padding: "14px 16px",
-                background: opt.id === current ? "rgba(59,183,255,0.1)" : "#1e2330",
-                border: `1.5px solid ${opt.id === current ? "#3bb7ff" : "rgba(255,255,255,0.08)"}`,
-                borderRadius: 12, cursor: opt.id === current ? "default" : "pointer",
-                opacity: loading ? 0.5 : 1, transition: "all 0.15s",
-              }}>
+              style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: opt.id === current ? "rgba(59,183,255,0.1)" : "#1e2330", border: `1.5px solid ${opt.id === current ? "#3bb7ff" : "rgba(255,255,255,0.08)"}`, borderRadius: 12, cursor: opt.id === current ? "default" : "pointer", opacity: loading ? 0.5 : 1, transition: "all 0.15s" }}>
               <span style={{ fontSize: 22, width: 32, textAlign: "center" }}>{opt.emoji}</span>
               <div style={{ flex: 1, textAlign: "left" }}>
                 <p style={{ fontSize: 15, fontWeight: 700, color: opt.id === current ? "#3bb7ff" : "#f0f2f7" }}>{opt.label}</p>
@@ -194,7 +160,6 @@ function StatusPickerModal({ current, onClose, onSelect, loading }: {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function LeadPage() {
   const params = useParams();
   const router = useRouter();
@@ -219,12 +184,10 @@ export default function LeadPage() {
       setLead(data);
       const { data: files } = await supabase.storage.from("lead-photos").list(`leads/${leadId}`);
       if (files && files.length > 0) {
-        const urls = await Promise.all(
-          files.map(async (f) => {
-            const { data: urlData } = supabase.storage.from("lead-photos").getPublicUrl(`leads/${leadId}/${f.name}`);
-            return urlData.publicUrl;
-          })
-        );
+        const urls = await Promise.all(files.map(async (f) => {
+          const { data: urlData } = supabase.storage.from("lead-photos").getPublicUrl(`leads/${leadId}/${f.name}`);
+          return urlData.publicUrl;
+        }));
         setPhotoUrls(urls);
       }
       setLoading(false);
@@ -237,8 +200,7 @@ export default function LeadPage() {
     const { error } = await supabase.from("leads").update({ status: newStatus }).eq("id", leadId);
     if (error) { setActionMsg("Something went wrong."); setActionLoading(false); return; }
     setLead((prev) => prev ? { ...prev, status: newStatus } : prev);
-    const cfg = STATUS_CONFIG[newStatus];
-    setActionMsg(`Status updated to ${cfg?.label ?? newStatus}`);
+    setActionMsg(`✅ Status updated to ${STATUS_CONFIG[newStatus]?.label ?? newStatus}`);
     setActionLoading(false);
     setShowStatusPicker(false);
   };
@@ -247,10 +209,7 @@ export default function LeadPage() {
     setOfferSending(true);
     const dayLabel = DAY_OPTIONS.find(d => d.id === day)?.label.toLowerCase();
     const windowLabel = TIME_WINDOW_OPTIONS.find(w => w.id === timeWindow)?.label.toLowerCase();
-    const { error } = await supabase.from("leads").update({
-      status: "time_offered",
-      offered_time: `${day} ${timeWindow}`,
-    }).eq("id", leadId);
+    const { error } = await supabase.from("leads").update({ status: "time_offered", offered_time: `${day} ${timeWindow}` }).eq("id", leadId);
     if (!error) {
       setLead((prev) => prev ? { ...prev, status: "time_offered" } : prev);
       setActionMsg(`📨 Time offer sent — "${dayLabel} ${windowLabel}"`);
@@ -273,7 +232,6 @@ export default function LeadPage() {
       <div style={{ minHeight: "100svh", background: "#0a0c10", color: "#f0f2f7", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, padding: 24 }}>
         <span style={{ fontSize: 48 }}>🔍</span>
         <p style={{ fontSize: 18, fontWeight: 700 }}>Lead not found</p>
-        <p style={{ fontSize: 14, color: "#7a8499" }}>Check the link and try again.</p>
       </div>
     );
   }
@@ -284,144 +242,195 @@ export default function LeadPage() {
   return (
     <>
       <style>{`
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: system-ui, sans-serif; background: #0a0c10; color: #f0f2f7; }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .page { max-width: 480px; margin: 0 auto; min-height: 100svh; display: flex; flex-direction: column; padding-bottom: 110px; }
-        .section { padding: 0 20px; animation: fadeUp 0.3s ease both; }
-        .section:nth-child(2) { animation-delay: 0.05s; }
-        .section:nth-child(3) { animation-delay: 0.1s; }
-        .section:nth-child(4) { animation-delay: 0.15s; }
-        .header { padding: 20px 20px 0; display: flex; align-items: center; justify-content: space-between; }
-        .back-btn { background: none; border: none; color: #7a8499; font-size: 14px; cursor: pointer; padding: 4px 0; display: flex; align-items: center; gap: 6px; }
-        .urgency-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; font-size: 13px; font-weight: 700; }
-        .time-since { font-size: 13px; color: #7a8499; }
-        .customer-block { padding: 20px 20px 0; }
-        .customer-name { font-size: clamp(28px, 7vw, 36px); font-weight: 800; line-height: 1.1; letter-spacing: -0.5px; color: #f0f2f7; }
+
+        .page { max-width: 900px; margin: 0 auto; padding: 0 0 120px; }
+        @media (min-width: 768px) { .page { padding: 32px 32px 80px; } }
+
+        /* Header */
+        .header { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 0; }
+        @media (min-width: 768px) { .header { padding: 0 0 24px; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 32px; } }
+        .back-btn { background: none; border: none; color: #7a8499; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 4px 0; }
+        .back-btn:hover { color: #f0f2f7; }
+        .header-right { display: flex; align-items: center; gap: 10px; }
+
+        /* Desktop 2-col layout */
+        .content { display: flex; flex-direction: column; }
+        @media (min-width: 768px) { .content { flex-direction: row; gap: 32px; align-items: flex-start; } }
+        .col-left { flex: 1; min-width: 0; }
+        .col-right { width: 320px; flex-shrink: 0; display: none; }
+        @media (min-width: 768px) { .col-right { display: flex; flex-direction: column; gap: 16px; } }
+
+        /* Customer block */
+        .customer-block { padding: 20px 20px 0; animation: fadeUp 0.3s ease; }
+        @media (min-width: 768px) { .customer-block { padding: 0 0 24px; } }
+        .urgency-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 100px; font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+        .customer-name { font-size: clamp(28px, 5vw, 40px); font-weight: 800; line-height: 1.1; letter-spacing: -0.5px; color: #f0f2f7; }
         .customer-name.unknown { color: #7a8499; font-style: italic; }
-        .phone-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; padding: 12px 20px; background: rgba(59,183,255,0.12); border: 1.5px solid rgba(59,183,255,0.3); border-radius: 100px; color: #3bb7ff; font-size: 18px; font-weight: 700; text-decoration: none; -webkit-tap-highlight-color: transparent; }
-        .phone-link:active { opacity: 0.7; }
-        .status-row { margin: 14px 20px 0; display: flex; align-items: center; gap: 10px; }
+        .phone-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; padding: 12px 20px; background: rgba(59,183,255,0.12); border: 1.5px solid rgba(59,183,255,0.3); border-radius: 100px; color: #3bb7ff; font-size: 18px; font-weight: 700; text-decoration: none; }
+        .phone-link:hover { background: rgba(59,183,255,0.2); }
+
+        /* Status */
+        .status-row { margin: 14px 20px 0; display: flex; align-items: center; gap: 10px; animation: fadeUp 0.3s ease 0.05s both; }
+        @media (min-width: 768px) { .status-row { margin: 0 0 20px; } }
         .status-chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 100px; font-size: 13px; font-weight: 700; }
         .change-status-btn { background: none; border: 1px solid rgba(255,255,255,0.1); color: #7a8499; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
-        .detail-card { margin: 20px 20px 0; background: #161a22; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; overflow: hidden; }
+        .change-status-btn:hover { border-color: rgba(255,255,255,0.2); color: #f0f2f7; }
+
+        /* Detail card */
+        .detail-card { margin: 20px 20px 0; background: #161a22; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; overflow: hidden; animation: fadeUp 0.3s ease 0.1s both; }
+        @media (min-width: 768px) { .detail-card { margin: 0 0 20px; } }
         .detail-row { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); }
         .detail-row:last-child { border-bottom: none; }
         .detail-key { font-size: 12px; font-weight: 600; color: #7a8499; text-transform: uppercase; letter-spacing: 0.5px; min-width: 80px; padding-top: 2px; flex-shrink: 0; }
         .detail-val { font-size: 15px; font-weight: 500; color: #e8eaf0; line-height: 1.5; }
         .issue-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(59,183,255,0.1); border: 1px solid rgba(59,183,255,0.25); border-radius: 8px; padding: 5px 12px; font-size: 14px; font-weight: 600; color: #3bb7ff; }
-        .photos-section { padding: 20px 20px 0; }
+
+        /* Photos */
+        .photos-section { padding: 20px 20px 0; animation: fadeUp 0.3s ease 0.15s both; }
+        @media (min-width: 768px) { .photos-section { padding: 0; } }
         .photos-title { font-size: 13px; font-weight: 600; color: #7a8499; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
         .photos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .photo-thumb { aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: #161a22; cursor: pointer; border: 1px solid rgba(255,255,255,0.07); }
+        .photo-thumb { aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: #161a22; cursor: pointer; border: 1px solid rgba(255,255,255,0.07); transition: transform 0.15s; }
+        .photo-thumb:hover { transform: scale(1.02); }
         .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Action message */
         .action-msg { margin: 16px 20px 0; padding: 12px 16px; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25); border-radius: 12px; font-size: 14px; font-weight: 600; color: #22c55e; }
-        .action-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: rgba(10,12,16,0.95); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.08); padding: 12px 16px 28px; display: flex; gap: 10px; z-index: 50; }
-        .btn-call { flex: 2; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 16px; background: #16a34a; color: #fff; font-size: 17px; font-weight: 800; border-radius: 14px; text-decoration: none; border: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-        .btn-call:active { background: #15803d; transform: scale(0.97); }
+        @media (min-width: 768px) { .action-msg { margin: 16px 0 0; } }
+
+        /* Desktop action panel (right column) */
+        .action-panel { background: #161a22; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 20px; }
+        .action-panel-title { font-size: 13px; font-weight: 700; color: #7a8499; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+        .desktop-action-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700; border: none; cursor: pointer; margin-bottom: 10px; transition: all 0.15s; text-decoration: none; }
+        .desktop-action-btn:last-child { margin-bottom: 0; }
+        .btn-call-desktop { background: #16a34a; color: #fff; }
+        .btn-call-desktop:hover { background: #15803d; }
+        .btn-status-desktop { background: #2563eb; color: #fff; }
+        .btn-status-desktop:hover { background: #1d4ed8; }
+        .btn-time-desktop { background: #374151; color: #d1d5db; }
+        .btn-time-desktop:hover { background: #4b5563; }
+
+        /* Mobile action bar */
+        .action-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,12,16,0.95); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.08); padding: 12px 16px 28px; display: flex; gap: 10px; z-index: 50; }
+        @media (min-width: 768px) { .action-bar { display: none; } }
+        .btn-call { flex: 2; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 16px; background: #16a34a; color: #fff; font-size: 17px; font-weight: 800; border-radius: 14px; text-decoration: none; border: none; cursor: pointer; }
         .btn-status { flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px 10px; background: #2563eb; color: #fff; font-size: 14px; font-weight: 700; border-radius: 14px; border: none; cursor: pointer; }
-        .btn-status:active { background: #1d4ed8; transform: scale(0.97); }
         .btn-time { flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px 10px; background: #374151; color: #d1d5db; font-size: 14px; font-weight: 700; border-radius: 14px; border: none; cursor: pointer; }
-        .btn-time:active { background: #4b5563; }
       `}</style>
 
       <div className="page">
         {/* Header */}
-        <div className="header section">
-          <button className="back-btn" onClick={() => router.push("/leads")}>← Leads</button>
-          <span className="time-since">{timeSince(lead.created_at)}</span>
-        </div>
-
-        {/* Urgency + Customer */}
-        <div className="customer-block section">
-          <span className="urgency-badge" style={{ background: urgency.bg, color: urgency.color, marginBottom: 12, display: "inline-flex" }}>
-            {urgency.label === "Emergency" ? "🚨" : urgency.label === "Soon" ? "⚡" : "✓"} {urgency.label}
-          </span>
-          <p className={`customer-name ${!lead.customer_name ? "unknown" : ""}`}>
-            {lead.customer_name || "Unknown caller"}
-          </p>
-          <a href={`tel:${lead.caller_phone}`} className="phone-link">
-            📞 {lead.caller_phone}
-          </a>
-        </div>
-
-        {/* Status row */}
-        <div className="status-row section">
-          <span className="status-chip" style={{ background: statusCfg.bg, color: statusCfg.color }}>
-            {statusCfg.label}
-          </span>
-          <button className="change-status-btn" onClick={() => setShowStatusPicker(true)}>
-            Change status ↓
-          </button>
-        </div>
-
-        {/* Detail card */}
-        <div className="detail-card section">
-          {lead.issue_type && (
-            <div className="detail-row">
-              <span className="detail-key">Issue</span>
-              <span className="detail-val"><span className="issue-chip">{ISSUE_LABELS[lead.issue_type] ?? lead.issue_type}</span></span>
-            </div>
-          )}
-          {lead.preferred_time && (
-            <div className="detail-row">
-              <span className="detail-key">Timing</span>
-              <span className="detail-val">{TIME_LABELS[lead.preferred_time] ?? lead.preferred_time}</span>
-            </div>
-          )}
-          {lead.description && (
-            <div className="detail-row">
-              <span className="detail-key">Notes</span>
-              <span className="detail-val">{lead.description}</span>
-            </div>
-          )}
-          <div className="detail-row">
-            <span className="detail-key">Lead ID</span>
-            <span className="detail-val" style={{ fontSize: 12, color: "#7a8499", fontFamily: "monospace" }}>{lead.id}</span>
+        <div className="header">
+          <button className="back-btn" onClick={() => router.push("/leads")}>← Back to Leads</button>
+          <div className="header-right">
+            <span style={{ fontSize: 13, color: "#7a8499" }}>{timeSince(lead.created_at)}</span>
           </div>
         </div>
 
-        {/* Photos */}
-        {photoUrls.length > 0 && (
-          <div className="photos-section section">
-            <p className="photos-title">Photos ({photoUrls.length})</p>
-            <div className="photos-grid">
-              {photoUrls.map((url, i) => (
-                <div key={i} className="photo-thumb" onClick={() => setLightboxUrl(url)}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt={`Photo ${i + 1}`} />
+        <div className="content">
+          {/* Left column */}
+          <div className="col-left">
+            {/* Customer */}
+            <div className="customer-block">
+              <span className="urgency-badge" style={{ background: urgency.bg, color: urgency.color }}>
+                {urgency.label === "Emergency" ? "🚨" : urgency.label === "Soon" ? "⚡" : "✓"} {urgency.label}
+              </span>
+              <p className={`customer-name ${!lead.customer_name ? "unknown" : ""}`}>
+                {lead.customer_name || "Unknown caller"}
+              </p>
+              <a href={`tel:${lead.caller_phone}`} className="phone-link">📞 {lead.caller_phone}</a>
+            </div>
+
+            {/* Status */}
+            <div className="status-row">
+              <span className="status-chip" style={{ background: statusCfg.bg, color: statusCfg.color }}>{statusCfg.label}</span>
+              <button className="change-status-btn" onClick={() => setShowStatusPicker(true)}>Change status ↓</button>
+            </div>
+
+            {/* Detail card */}
+            <div className="detail-card">
+              {lead.issue_type && (
+                <div className="detail-row">
+                  <span className="detail-key">Issue</span>
+                  <span className="detail-val"><span className="issue-chip">{ISSUE_LABELS[lead.issue_type] ?? lead.issue_type}</span></span>
                 </div>
-              ))}
+              )}
+              {lead.preferred_time && (
+                <div className="detail-row">
+                  <span className="detail-key">Timing</span>
+                  <span className="detail-val">{TIME_LABELS[lead.preferred_time] ?? lead.preferred_time}</span>
+                </div>
+              )}
+              {lead.description && (
+                <div className="detail-row">
+                  <span className="detail-key">Notes</span>
+                  <span className="detail-val">{lead.description}</span>
+                </div>
+              )}
+              <div className="detail-row">
+                <span className="detail-key">Lead ID</span>
+                <span className="detail-val" style={{ fontSize: 12, color: "#7a8499", fontFamily: "monospace" }}>{lead.id}</span>
+              </div>
+            </div>
+
+            {/* Photos */}
+            {photoUrls.length > 0 && (
+              <div className="photos-section">
+                <p className="photos-title">Photos ({photoUrls.length})</p>
+                <div className="photos-grid">
+                  {photoUrls.map((url, i) => (
+                    <div key={i} className="photo-thumb" onClick={() => setLightboxUrl(url)}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} alt={`Photo ${i + 1}`} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {actionMsg && <div className="action-msg">{actionMsg}</div>}
+          </div>
+
+          {/* Right column — desktop only */}
+          <div className="col-right">
+            <div className="action-panel">
+              <p className="action-panel-title">Actions</p>
+              <a href={`tel:${lead.caller_phone}`} className="desktop-action-btn btn-call-desktop">📞 Call Now</a>
+              <button className="desktop-action-btn btn-status-desktop" onClick={() => setShowStatusPicker(true)}>📋 Update Status</button>
+              <button className="desktop-action-btn btn-time-desktop" onClick={() => setShowOfferTime(true)}>🕐 Offer Time</button>
+            </div>
+
+            <div className="action-panel">
+              <p className="action-panel-title">Lead Info</p>
+              <div style={{ fontSize: 13, color: "#7a8499", display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span>Submitted</span>
+                  <span style={{ color: "#f0f2f7", fontWeight: 600 }}>{timeSince(lead.created_at)}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span>Status</span>
+                  <span className="status-chip" style={{ background: statusCfg.bg, color: statusCfg.color, fontSize: 12, padding: "3px 10px" }}>{statusCfg.label}</span>
+                </div>
+              </div>
             </div>
           </div>
-        )}
-
-        {actionMsg && <div className="action-msg section">{actionMsg}</div>}
+        </div>
       </div>
 
-      {/* Sticky action bar */}
+      {/* Mobile action bar */}
       <div className="action-bar">
         <a href={`tel:${lead.caller_phone}`} className="btn-call">📞 Call Now</a>
-        <button className="btn-status" onClick={() => setShowStatusPicker(true)}>
-          📋 Status
-        </button>
-        <button className="btn-time" onClick={() => setShowOfferTime(true)}>
-          🕐 Time
-        </button>
+        <button className="btn-status" onClick={() => setShowStatusPicker(true)}>📋 Status</button>
+        <button className="btn-time" onClick={() => setShowOfferTime(true)}>🕐 Time</button>
       </div>
 
       {lightboxUrl && <Lightbox url={lightboxUrl} onClose={() => setLightboxUrl(null)} />}
       {showOfferTime && <OfferTimeModal onClose={() => setShowOfferTime(false)} onSend={handleSendOffer} sending={offerSending} />}
-      {showStatusPicker && (
-        <StatusPickerModal
-          current={lead.status}
-          onClose={() => setShowStatusPicker(false)}
-          onSelect={updateStatus}
-          loading={actionLoading}
-        />
-      )}
+      {showStatusPicker && <StatusPickerModal current={lead.status} onClose={() => setShowStatusPicker(false)} onSelect={updateStatus} loading={actionLoading} />}
     </>
   );
 }
