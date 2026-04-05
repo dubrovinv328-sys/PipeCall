@@ -65,6 +65,49 @@ const FILTERS = [
   { id: "declined",  label: "Passed",    icon: "✗"  },
 ];
 
+/* ─── KatchFlow SVG Logo ─── */
+/* Reproduces the real logo: navy K with orange circle accent + "Katch" bold navy / "Flow" light navy */
+function KatchFlowLogo({ size = 36, textSize = 18 }: { size?: number; textSize?: number }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      {/* Icon mark: K with orange dot */}
+      <svg width={size} height={size} viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Left vertical bar of K */}
+        <rect x="6" y="4" width="6" height="28" rx="2" fill="white" />
+        {/* Top-right diagonal of K */}
+        <path d="M12 18 L28 4 L34 4 L34 8 L18 20 Z" fill="white" />
+        {/* Bottom-right diagonal of K */}
+        <path d="M12 18 L28 32 L34 32 L34 28 L18 16 Z" fill="white" />
+        {/* Orange circle at the junction */}
+        <circle cx="13.5" cy="18" r="5" fill="#f97316" />
+      </svg>
+      {/* Wordmark */}
+      <span style={{ fontSize: textSize, lineHeight: 1, userSelect: "none" }}>
+        <span style={{ fontWeight: 800, color: "white", letterSpacing: "-0.3px" }}>Katch</span>
+        <span style={{ fontWeight: 300, color: "white", opacity: 0.85, letterSpacing: "-0.3px" }}>Flow</span>
+      </span>
+    </div>
+  );
+}
+
+/* Topbar variant — dark K on navy/white bar */
+function KatchFlowLogoTopbar() {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <svg width={28} height={28} viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="4" width="6" height="28" rx="2" fill="#1a2b5e" />
+        <path d="M12 18 L28 4 L34 4 L34 8 L18 20 Z" fill="#1a2b5e" />
+        <path d="M12 18 L28 32 L34 32 L34 28 L18 16 Z" fill="#1a2b5e" />
+        <circle cx="13.5" cy="18" r="5" fill="#f97316" />
+      </svg>
+      <span style={{ fontSize: 16, lineHeight: 1, userSelect: "none" }}>
+        <span style={{ fontWeight: 800, color: "#1a2b5e", letterSpacing: "-0.3px" }}>Katch</span>
+        <span style={{ fontWeight: 300, color: "#1a2b5e", letterSpacing: "-0.3px" }}>Flow</span>
+      </span>
+    </div>
+  );
+}
+
 export default function LeadsPage() {
   const router = useRouter();
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -104,7 +147,7 @@ export default function LeadsPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: #f4f6fb; color: #1a2b5e; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
@@ -136,11 +179,7 @@ export default function LeadsPage() {
           }
         }
 
-        .sidebar-header { padding: 28px 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-logo { display: flex; align-items: center; gap: 10px; }
-        .logo-mark { width: 36px; height: 36px; background: var(--orange); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; color: white; flex-shrink: 0; letter-spacing: -1px; }
-        .logo-text { font-size: 18px; font-weight: 800; color: white; letter-spacing: -0.3px; }
-        .logo-text span { color: var(--orange); }
+        .sidebar-header { padding: 24px 20px 22px; border-bottom: 1px solid rgba(255,255,255,0.1); }
 
         .sidebar-nav { flex: 1; padding: 20px 12px; display: flex; flex-direction: column; gap: 2px; }
         .sidebar-section-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1px; padding: 12px 8px 6px; }
@@ -160,13 +199,10 @@ export default function LeadsPage() {
 
         /* Top bar */
         .topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
-        .topbar-left { display: flex; align-items: center; gap: 12px; }
-        .topbar-logo { display: flex; align-items: center; gap: 8px; }
-        .topbar-logo-mark { width: 30px; height: 30px; background: var(--navy); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; color: var(--orange); }
-        .topbar-logo-text { font-size: 16px; font-weight: 800; color: var(--navy); letter-spacing: -0.3px; }
-        .topbar-logo-text span { color: var(--orange); }
+        .topbar-left { display: flex; align-items: center; gap: 14px; }
+        .topbar-logo-wrap { display: flex; }
         .page-title { font-size: 18px; font-weight: 800; color: var(--navy); }
-        @media (min-width: 768px) { .topbar-logo { display: none; } }
+        @media (min-width: 768px) { .topbar-logo-wrap { display: none; } }
         .topbar-right { display: flex; align-items: center; gap: 10px; }
         .btn-icon { width: 36px; height: 36px; border-radius: 8px; border: 1.5px solid var(--border); background: none; color: var(--text-muted); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
         .btn-icon:hover { border-color: var(--navy); color: var(--navy); }
@@ -233,10 +269,7 @@ export default function LeadsPage() {
         {/* Sidebar */}
         <aside className="sidebar">
           <div className="sidebar-header">
-            <div className="sidebar-logo">
-              <div className="logo-mark">K</div>
-              <span className="logo-text">Katch<span>Flow</span></span>
-            </div>
+            <KatchFlowLogo size={36} textSize={18} />
           </div>
           <nav className="sidebar-nav">
             <span className="sidebar-section-label">Leads</span>
@@ -258,9 +291,8 @@ export default function LeadsPage() {
           {/* Topbar */}
           <div className="topbar">
             <div className="topbar-left">
-              <div className="topbar-logo">
-                <div className="topbar-logo-mark">K</div>
-                <span className="topbar-logo-text">Katch<span>Flow</span></span>
+              <div className="topbar-logo-wrap">
+                <KatchFlowLogoTopbar />
               </div>
               <h1 className="page-title">Leads</h1>
             </div>
