@@ -389,10 +389,10 @@ export default function IntakePage() {
         }
 
         /* Top bar */
-        .top-bar { display: flex; align-items: center; gap: 10px; padding: 20px 24px 0; }
+        .top-bar { display: flex; align-items: center; gap: 10px; padding: 16px 24px; background: #1a2b5e; border-bottom: 2px solid rgba(255,255,255,0.08); }
         .top-bar-brand { display: flex; align-items: center; gap: 9px; flex: 1; flex-shrink: 0; }
-        .top-bar-lead { font-size: 12px; color: #64748b; background: #f1f5f9; padding: 4px 10px; border-radius: 20px; border: 1px solid #e2e8f0; white-space: nowrap; }
-        .light-mode .top-bar-lead { background: #f1f5f9; color: #64748b; border-color: #e2e8f0; }
+        .top-bar-lead { font-size: 12px; color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); white-space: nowrap; }
+        
 
         /* Step indicator */
         .step-indicator { display: flex; align-items: flex-start; padding: 20px 24px 4px; }
@@ -520,7 +520,7 @@ export default function IntakePage() {
         {/* Top bar — WeKatch logo */}
         <div className="top-bar">
           <div className="top-bar-brand">
-            <WeKatchMark light={isConfirm} />
+            <WeKatchMark light={false} />
           </div>
           {leadId && <span className="top-bar-lead">#{leadId.slice(0, 8).toUpperCase()}</span>}
         </div>
