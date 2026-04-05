@@ -66,7 +66,6 @@ async function compressImage(file: File, maxMB = 1): Promise<File> {
   });
 }
 
-// ─── Step Indicator ───────────────────────────────────────────────────────────
 function StepIndicator({ current, light }: { current: number; light?: boolean }) {
   return (
     <div className={`step-indicator ${light ? "light" : ""}`}>
@@ -87,16 +86,12 @@ function StepIndicator({ current, light }: { current: number; light?: boolean })
   );
 }
 
-// ─── Step 1 ───────────────────────────────────────────────────────────────────
 function Step1({ onNext }: { onNext: (issueId: string) => void }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [showError, setShowError] = useState(false);
 
   const handleContinue = () => {
-    if (!selected) {
-      setShowError(true);
-      return;
-    }
+    if (!selected) { setShowError(true); return; }
     onNext(selected);
   };
 
@@ -118,9 +113,7 @@ function Step1({ onNext }: { onNext: (issueId: string) => void }) {
           </button>
         ))}
       </div>
-      {showError && (
-        <p className="validation-error">⚠️ Please select an issue type to continue.</p>
-      )}
+      {showError && <p className="validation-error">⚠️ Please select an issue type to continue.</p>}
       <div className="step-footer">
         <button type="button" className="btn-primary" onClick={handleContinue}>
           Continue
@@ -131,7 +124,6 @@ function Step1({ onNext }: { onNext: (issueId: string) => void }) {
   );
 }
 
-// ─── Step 2 ───────────────────────────────────────────────────────────────────
 function Step2({ leadId, onNext, onBack }: { leadId: string; onNext: (data: { description: string; photoPaths: string[] }) => void; onBack: () => void; }) {
   const [description, setDescription] = useState("");
   const [photos, setPhotos] = useState<PhotoFile[]>([]);
@@ -172,30 +164,32 @@ function Step2({ leadId, onNext, onBack }: { leadId: string; onNext: (data: { de
         <h1 className="step-title">Describe the issue</h1>
         <p className="step-subtitle">Optional — helps the plumber prepare before arrival</p>
       </div>
-      <div className="field-group">
-        <label className="field-label">Description <span className="field-optional">optional</span></label>
-        <textarea className="field-textarea" placeholder="e.g. Water dripping under the kitchen sink, started 2 days ago…" value={description} onChange={(e) => setDescription(e.target.value)} rows={4} maxLength={500} />
-        <span className="field-count">{description.length}/500</span>
-      </div>
-      <div className="field-group">
-        <label className="field-label">Photos <span className="field-optional">up to 3, optional</span></label>
-        <div className="photo-grid">
-          {photos.map((p, i) => (
-            <div key={i} className="photo-thumb">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.preview} alt={`Photo ${i + 1}`} />
-              <button type="button" className="photo-remove" onClick={() => removePhoto(i)}>✕</button>
-            </div>
-          ))}
-          {photos.length < 3 && (
-            <button type="button" className="photo-add" onClick={() => fileInputRef.current?.click()}>
-              <span className="photo-add-icon">📷</span>
-              <span className="photo-add-label">Add photo</span>
-            </button>
-          )}
+      <div className="desktop-two-col">
+        <div className="field-group">
+          <label className="field-label">Description <span className="field-optional">optional</span></label>
+          <textarea className="field-textarea" placeholder="e.g. Water dripping under the kitchen sink, started 2 days ago…" value={description} onChange={(e) => setDescription(e.target.value)} rows={5} maxLength={500} />
+          <span className="field-count">{description.length}/500</span>
         </div>
-        <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={handleFileChange} />
-        <p className="field-hint">Compressed to under 1MB automatically</p>
+        <div className="field-group">
+          <label className="field-label">Photos <span className="field-optional">up to 3, optional</span></label>
+          <div className="photo-grid">
+            {photos.map((p, i) => (
+              <div key={i} className="photo-thumb">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={p.preview} alt={`Photo ${i + 1}`} />
+                <button type="button" className="photo-remove" onClick={() => removePhoto(i)}>✕</button>
+              </div>
+            ))}
+            {photos.length < 3 && (
+              <button type="button" className="photo-add" onClick={() => fileInputRef.current?.click()}>
+                <span className="photo-add-icon">📷</span>
+                <span className="photo-add-label">Add photo</span>
+              </button>
+            )}
+          </div>
+          <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={handleFileChange} />
+          <p className="field-hint">Compressed to under 1MB automatically</p>
+        </div>
       </div>
       <div className="step-footer">
         <button type="button" className="btn-back" onClick={onBack}>← Back</button>
@@ -208,7 +202,6 @@ function Step2({ leadId, onNext, onBack }: { leadId: string; onNext: (data: { de
   );
 }
 
-// ─── Step 3 ───────────────────────────────────────────────────────────────────
 function Step3({ initialPhone, onNext, onBack }: { initialPhone?: string; onNext: (data: { timePreference: string; name: string; phone: string }) => void; onBack: () => void; }) {
   const [timePreference, setTimePreference] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -219,10 +212,7 @@ function Step3({ initialPhone, onNext, onBack }: { initialPhone?: string; onNext
     const newErrors: { time?: string; phone?: string } = {};
     if (!timePreference) newErrors.time = "Please select when you need help.";
     if (!phone.trim()) newErrors.phone = "Phone number is required so we can contact you.";
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
     onNext({ timePreference: timePreference!, name, phone });
   };
 
@@ -232,37 +222,38 @@ function Step3({ initialPhone, onNext, onBack }: { initialPhone?: string; onNext
         <h1 className="step-title">When &amp; who?</h1>
         <p className="step-subtitle">Pick a time and leave your details</p>
       </div>
-      <div className="field-group">
-        <label className="field-label">When do you need help?</label>
-        <div className="time-options">
-          {TIME_OPTIONS.map((opt) => (
-            <button key={opt.id} type="button"
-              className={`time-option ${timePreference === opt.id ? "selected" : ""} ${opt.id === "asap" ? "urgent" : ""}`}
-              onClick={() => { setTimePreference(opt.id); setErrors((e) => ({ ...e, time: undefined })); }}>
-              <span className="time-emoji">{opt.emoji}</span>
-              <div className="time-text">
-                <span className="time-label">{opt.label}</span>
-                <span className="time-sublabel">{opt.sublabel}</span>
-              </div>
-              <span className="time-radio">{timePreference === opt.id ? "●" : "○"}</span>
-            </button>
-          ))}
+      <div className="desktop-two-col">
+        <div className="field-group">
+          <label className="field-label">When do you need help?</label>
+          <div className="time-options">
+            {TIME_OPTIONS.map((opt) => (
+              <button key={opt.id} type="button"
+                className={`time-option ${timePreference === opt.id ? "selected" : ""} ${opt.id === "asap" ? "urgent" : ""}`}
+                onClick={() => { setTimePreference(opt.id); setErrors((e) => ({ ...e, time: undefined })); }}>
+                <span className="time-emoji">{opt.emoji}</span>
+                <div className="time-text">
+                  <span className="time-label">{opt.label}</span>
+                  <span className="time-sublabel">{opt.sublabel}</span>
+                </div>
+                <span className="time-radio">{timePreference === opt.id ? "●" : "○"}</span>
+              </button>
+            ))}
+          </div>
+          {errors.time && <p className="validation-error">⚠️ {errors.time}</p>}
         </div>
-        {errors.time && <p className="validation-error">⚠️ {errors.time}</p>}
-      </div>
-      <div className="field-group">
-        <label className="field-label">Your name <span className="field-optional">optional</span></label>
-        <input className="field-input" type="text" placeholder="e.g. John Smith" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
-      </div>
-      <div className="field-group">
-        <label className="field-label">Phone number <span className="field-required">required</span></label>
-        <input
-          className={`field-input ${errors.phone ? "input-error" : ""}`}
-          type="tel" placeholder="+1 (555) 000-0000" value={phone}
-          onChange={(e) => { setPhone(e.target.value); setErrors((err) => ({ ...err, phone: undefined })); }}
-          autoComplete="tel" inputMode="tel"
-        />
-        {errors.phone && <p className="validation-error">⚠️ {errors.phone}</p>}
+        <div>
+          <div className="field-group">
+            <label className="field-label">Your name <span className="field-optional">optional</span></label>
+            <input className="field-input" type="text" placeholder="e.g. John Smith" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
+          </div>
+          <div className="field-group">
+            <label className="field-label">Phone number <span className="field-required">required</span></label>
+            <input className={`field-input ${errors.phone ? "input-error" : ""}`} type="tel" placeholder="+1 (555) 000-0000" value={phone}
+              onChange={(e) => { setPhone(e.target.value); setErrors((err) => ({ ...err, phone: undefined })); }}
+              autoComplete="tel" inputMode="tel" />
+            {errors.phone && <p className="validation-error">⚠️ {errors.phone}</p>}
+          </div>
+        </div>
       </div>
       <div className="step-footer">
         <button type="button" className="btn-back" onClick={onBack}>← Back</button>
@@ -275,24 +266,20 @@ function Step3({ initialPhone, onNext, onBack }: { initialPhone?: string; onNext
   );
 }
 
-// ─── Step 4: Confirmation ─────────────────────────────────────────────────────
 function Step4({ leadId, formData, onBack }: { leadId: string; formData: FormData; onBack: () => void }) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
 
   const handleSubmit = async () => {
     setStatus("submitting");
     try {
-      const { error } = await supabase
-        .from("leads")
-        .update({
-          issue_type: formData.issueId,
-          description: formData.description || null,
-          preferred_time: formData.timePreference,
-          customer_name: formData.name || null,
-          caller_phone: formData.phone,
-          status: "new",
-        })
-        .eq("id", leadId);
+      const { error } = await supabase.from("leads").update({
+        issue_type: formData.issueId,
+        description: formData.description || null,
+        preferred_time: formData.timePreference,
+        customer_name: formData.name || null,
+        caller_phone: formData.phone,
+        status: "new",
+      }).eq("id", leadId);
       if (error) throw error;
       setStatus("success");
     } catch (err) {
@@ -344,9 +331,7 @@ function Step4({ leadId, formData, onBack }: { leadId: string; formData: FormDat
           <span className="summary-val">{formData.phone}</span>
         </div>
       </div>
-      {status === "error" && (
-        <p className="error-msg">Something went wrong. Please try again.</p>
-      )}
+      {status === "error" && <p className="error-msg">Something went wrong. Please try again.</p>}
       <div className="step-footer">
         <button type="button" className="btn-back confirm-back" onClick={onBack} disabled={status === "submitting"}>← Edit</button>
         <button type="button" className="btn-submit" onClick={handleSubmit} disabled={status === "submitting"}>
@@ -357,7 +342,6 @@ function Step4({ leadId, formData, onBack }: { leadId: string; formData: FormDat
   );
 }
 
-// ─── Success Screen ───────────────────────────────────────────────────────────
 function SuccessScreen() {
   const [animate, setAnimate] = useState(false);
   useEffect(() => { setTimeout(() => setAnimate(true), 100); }, []);
@@ -368,8 +352,7 @@ function SuccessScreen() {
           <circle cx="40" cy="40" r="36" stroke="#22c55e" strokeWidth="4" strokeDasharray="226" strokeDashoffset={animate ? "0" : "226"} />
         </svg>
         <svg className="checkmark-tick" viewBox="0 0 80 80" fill="none">
-          <path d="M24 40L35 52L56 28" stroke="#22c55e" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"
-            strokeDasharray="50" strokeDashoffset={animate ? "0" : "50"} />
+          <path d="M24 40L35 52L56 28" stroke="#22c55e" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="50" strokeDashoffset={animate ? "0" : "50"} />
         </svg>
       </div>
       <h1 className="success-title">Request sent!</h1>
@@ -379,7 +362,6 @@ function SuccessScreen() {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function IntakePage() {
   const params = useParams();
   const leadId = params?.leadId as string;
@@ -387,19 +369,17 @@ export default function IntakePage() {
   const [formData, setFormData] = useState<FormData>({});
   const isConfirm = currentStep === 3;
 
-  // ── Track intake_started event once on mount ──────────────────────
   useEffect(() => {
     if (!leadId) return;
     const trackStart = async () => {
       try {
         await supabase.from("events").insert({
           lead_id: leadId,
-          business_id: null, // TODO: replace null with your real business_id
+          business_id: null,
           event_type: "intake_started",
           event_data: { started_at: new Date().toISOString() },
         });
       } catch (err) {
-        // Non-blocking — never show this error to the user
         console.error("Failed to track intake_started:", err);
       }
     };
@@ -415,25 +395,35 @@ export default function IntakePage() {
           --border: rgba(255,255,255,0.08); --text: #f0f2f7; --text-muted: #7a8499;
           --accent: #3bb7ff; --accent-glow: rgba(59,183,255,0.15);
           --urgent: #ff4d4d; --urgent-glow: rgba(255,77,77,0.15);
-          --success: #22c55e; --radius: 16px; --radius-sm: 10px;
-          --blue: #2563eb;
+          --success: #22c55e; --radius: 16px; --radius-sm: 10px; --blue: #2563eb;
         }
-        html, body { height: 100%; font-family: system-ui, sans-serif; font-size: 16px; }
-        .intake-wrapper { min-height: 100svh; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; background: #0d0f14; color: #f0f2f7; }
+        html, body { height: 100%; font-family: system-ui, sans-serif; font-size: 16px; background: #0d0f14; }
+        
+        /* Wrapper — centered on desktop */
+        .intake-wrapper { min-height: 100svh; display: flex; flex-direction: column; max-width: 560px; margin: 0 auto; background: #0d0f14; color: #f0f2f7; }
         .intake-wrapper.light-mode { background: #ffffff; color: #111827; }
-        .top-bar { display: flex; align-items: center; gap: 10px; padding: 18px 20px 0; }
-        .top-bar-logo { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        @media (min-width: 768px) {
+          body { background: #070809; }
+          .intake-wrapper { max-width: 680px; border-left: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05); box-shadow: 0 0 60px rgba(0,0,0,0.5); }
+          .intake-wrapper.light-mode { background: #fff; }
+        }
+
+        /* Top bar */
+        .top-bar { display: flex; align-items: center; gap: 10px; padding: 20px 24px 0; }
+        .top-bar-logo { width: 36px; height: 36px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
         .light-mode .top-bar-logo { background: var(--blue); }
-        .top-bar-name { font-size: 15px; font-weight: 600; flex: 1; }
+        .top-bar-name { font-size: 16px; font-weight: 700; flex: 1; }
         .top-bar-lead { font-size: 12px; color: var(--text-muted); background: var(--surface-2); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); }
         .light-mode .top-bar-lead { background: #f1f5f9; color: #64748b; border-color: #e2e8f0; }
+
+        /* Step indicator */
         .step-indicator { display: flex; align-items: flex-start; padding: 20px 24px 4px; }
         .step { display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; flex: 1; }
         .step-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; border: 2px solid transparent; position: relative; z-index: 1; }
         .step.active .step-dot { background: var(--accent); border-color: var(--accent); color: #000; box-shadow: 0 0 16px rgba(59,183,255,0.45); }
         .step.done .step-dot { background: var(--success); border-color: var(--success); color: #fff; }
         .step.pending .step-dot { background: var(--surface-2); border-color: var(--border); color: var(--text-muted); }
-        .light-mode .step.active .step-dot { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: 0 0 16px rgba(37,99,235,0.3); }
+        .light-mode .step.active .step-dot { background: var(--blue); border-color: var(--blue); color: #fff; }
         .light-mode .step.pending .step-dot { background: #f1f5f9; border-color: #e2e8f0; color: #94a3b8; }
         .step-label { font-size: 11px; font-weight: 500; color: var(--text-muted); white-space: nowrap; }
         .step.active .step-label { color: var(--accent); font-weight: 600; }
@@ -442,16 +432,23 @@ export default function IntakePage() {
         .step-line { position: absolute; top: 13px; left: calc(50% + 14px); right: calc(-50% + 14px); height: 2px; background: var(--border); }
         .step.done .step-line { background: var(--success); }
         .light-mode .step-line { background: #e2e8f0; }
-        .step-content { flex: 1; display: flex; flex-direction: column; padding: 8px 20px 0; }
-        .step-header { padding: 20px 0 18px; }
-        .step-title { font-size: clamp(22px, 6vw, 28px); font-weight: 700; line-height: 1.2; letter-spacing: -0.5px; }
+
+        /* Step content */
+        .step-content { flex: 1; display: flex; flex-direction: column; padding: 8px 24px 0; }
+        .step-header { padding: 20px 0 20px; }
+        .step-title { font-size: clamp(22px, 5vw, 30px); font-weight: 800; line-height: 1.2; letter-spacing: -0.5px; }
         .step-subtitle { margin-top: 6px; font-size: 14px; color: var(--text-muted); }
         .light-mode .step-subtitle { color: #64748b; }
+
+        /* Issue grid — 2 cols mobile, 4 cols desktop */
         .issue-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (min-width: 768px) { .issue-grid { grid-template-columns: repeat(4, 1fr); } }
         .issue-card { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 20px 12px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); cursor: pointer; text-align: center; transition: all 0.18s; -webkit-tap-highlight-color: transparent; min-height: 110px; touch-action: manipulation; }
+        .issue-card:hover { border-color: rgba(59,183,255,0.3); background: rgba(59,183,255,0.05); }
         .issue-card:active { transform: scale(0.96); }
         .issue-card.selected { background: var(--accent-glow); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
         .issue-card.urgent { border-color: rgba(255,77,77,0.3); }
+        .issue-card.urgent:hover { border-color: rgba(255,77,77,0.5); background: rgba(255,77,77,0.05); }
         .issue-card.urgent.selected { background: var(--urgent-glow); border-color: var(--urgent); box-shadow: 0 0 0 1px var(--urgent); }
         .card-emoji { font-size: 30px; line-height: 1; }
         .card-label { font-size: 14px; font-weight: 700; line-height: 1.2; }
@@ -459,6 +456,12 @@ export default function IntakePage() {
         .issue-card.urgent .card-label { color: #ff7070; }
         .card-check { position: absolute; top: 8px; right: 10px; font-size: 12px; color: var(--accent); font-weight: 700; }
         .issue-card.urgent .card-check { color: var(--urgent); }
+
+        /* Desktop two-col layout for steps 2 & 3 */
+        .desktop-two-col { display: flex; flex-direction: column; gap: 0; }
+        @media (min-width: 768px) { .desktop-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; } }
+
+        /* Fields */
         .field-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
         .field-label { font-size: 14px; font-weight: 600; }
         .field-optional { font-size: 12px; font-weight: 400; color: var(--text-muted); margin-left: 6px; }
@@ -474,15 +477,21 @@ export default function IntakePage() {
         .field-count { font-size: 12px; color: var(--text-muted); text-align: right; }
         .field-hint { font-size: 12px; color: var(--text-muted); }
         .validation-error { font-size: 13px; color: #f87171; font-weight: 500; margin-top: 2px; }
+
+        /* Photos */
         .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .photo-thumb { position: relative; aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden; background: var(--surface-2); }
         .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
         .photo-remove { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%; background: rgba(0,0,0,0.7); border: none; color: #fff; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .photo-add { aspect-ratio: 1; border-radius: var(--radius-sm); background: var(--surface); border: 1.5px dashed var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .photo-add { aspect-ratio: 1; border-radius: var(--radius-sm); background: var(--surface); border: 1.5px dashed var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: border-color 0.15s; }
+        .photo-add:hover { border-color: var(--accent); }
         .photo-add-icon { font-size: 22px; }
         .photo-add-label { font-size: 11px; color: var(--text-muted); }
+
+        /* Time options */
         .time-options { display: flex; flex-direction: column; gap: 10px; }
         .time-option { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; text-align: left; transition: all 0.18s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; width: 100%; }
+        .time-option:hover { border-color: rgba(59,183,255,0.3); }
         .time-option:active { transform: scale(0.98); }
         .time-option.selected { background: var(--accent-glow); border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
         .time-option.urgent { border-color: rgba(255,77,77,0.3); }
@@ -498,6 +507,8 @@ export default function IntakePage() {
         .time-option.selected .time-radio { color: var(--accent); }
         .time-option.urgent.selected .time-radio { color: var(--urgent); }
         .light-mode .time-option.selected .time-radio { color: var(--blue); }
+
+        /* Confirm page */
         .confirm-page { background: #fff; color: #111827; }
         .confirm-title { color: #111827; }
         .summary-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; }
@@ -507,18 +518,23 @@ export default function IntakePage() {
         .summary-val { font-size: 14px; font-weight: 600; color: #111827; }
         .summary-desc { font-weight: 400; line-height: 1.5; }
         .error-msg { color: #ef4444; font-size: 14px; margin-bottom: 12px; text-align: center; }
-        .btn-submit { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 17px 24px; background: var(--blue); color: #fff; font-size: 16px; font-weight: 700; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.18s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 56px; }
+
+        /* Buttons */
+        .step-footer { padding: 24px 0 32px; margin-top: auto; display: flex; gap: 10px; }
+        .btn-primary { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 17px 24px; background: var(--accent); color: #000; font-size: 16px; font-weight: 700; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.18s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        .btn-primary:hover { background: #5bc4ff; }
+        .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+        .btn-primary:not(:disabled):active { transform: scale(0.97); }
+        .btn-back { padding: 17px 18px; background: var(--surface-2); color: var(--text-muted); font-size: 15px; font-weight: 600; border: 1.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; -webkit-tap-highlight-color: transparent; white-space: nowrap; transition: all 0.15s; }
+        .btn-back:hover { border-color: rgba(255,255,255,0.2); color: #f0f2f7; }
+        .btn-submit { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 17px 24px; background: var(--blue); color: #fff; font-size: 16px; font-weight: 700; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.18s; min-height: 56px; }
+        .btn-submit:hover { background: #1d4ed8; }
         .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-submit:not(:disabled):active { transform: scale(0.97); background: #1d4ed8; }
         .confirm-back { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
         .spinner { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .step-footer { padding: 24px 0 28px; margin-top: auto; display: flex; gap: 10px; }
-        .btn-primary { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 17px 24px; background: var(--accent); color: #000; font-size: 16px; font-weight: 700; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.18s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-        .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
-        .btn-primary:not(:disabled):active { transform: scale(0.97); }
-        .btn-back { padding: 17px 18px; background: var(--surface-2); color: var(--text-muted); font-size: 15px; font-weight: 600; border: 1.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; -webkit-tap-highlight-color: transparent; white-space: nowrap; }
-        .btn-back:active { opacity: 0.7; }
+
+        /* Success */
         .success-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; background: #fff; text-align: center; }
         .checkmark-wrap { position: relative; width: 100px; height: 100px; margin-bottom: 28px; }
         .checkmark-circle { width: 100%; height: 100%; }
@@ -526,9 +542,10 @@ export default function IntakePage() {
         .checkmark-tick { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .checkmark-tick path { transition: stroke-dashoffset 0.4s 0.5s cubic-bezier(0.65, 0, 0.45, 1); }
         .success-title { font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.5px; margin-bottom: 12px; }
-        .success-subtitle { font-size: 16px; color: #475569; line-height: 1.6; max-width: 300px; margin-bottom: 28px; }
+        .success-subtitle { font-size: 16px; color: #475569; line-height: 1.6; max-width: 340px; margin-bottom: 28px; }
         .success-badge { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; border-radius: 100px; padding: 10px 20px; font-size: 14px; font-weight: 600; }
       `}</style>
+
       <div className={`intake-wrapper ${isConfirm ? "light-mode" : ""}`}>
         <div className="top-bar">
           <div className="top-bar-logo">🔧</div>
