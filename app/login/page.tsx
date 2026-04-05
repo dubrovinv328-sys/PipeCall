@@ -366,7 +366,7 @@ export default function LoginPage() {
           </p>
           <div className="badge">
             <div className="badge-dot" />
-            Colorado&apos;s Plumber Platform
+            Illinois&apos;s Plumber Platform
           </div>
         </div>
 
