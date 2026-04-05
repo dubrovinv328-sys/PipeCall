@@ -300,6 +300,7 @@ function Step4({ leadId, formData, onBack }: { leadId: string; formData: FormDat
   const selectedIssue = ISSUE_CATEGORIES.find((c) => c.id === formData.issueId);
   const selectedTime = TIME_OPTIONS.find((t) => t.id === formData.timePreference);
   if (status === "success") return <SuccessScreen />;
+  if (status === "error") return <FallbackScreen onRetry={() => setStatus("idle")} />;
 
   return (
     <div className="step-content confirm-page">
@@ -315,13 +316,31 @@ function Step4({ leadId, formData, onBack }: { leadId: string; formData: FormDat
         {formData.name && <div className="summary-row"><span className="summary-key">Name</span><span className="summary-val">{formData.name}</span></div>}
         <div className="summary-row"><span className="summary-key">Phone</span><span className="summary-val">{formData.phone}</span></div>
       </div>
-      {status === "error" && <p className="error-msg">Something went wrong. Please try again.</p>}
+
       <div className="step-footer">
         <button type="button" className="btn-back confirm-back" onClick={onBack} disabled={status === "submitting"}>← Edit</button>
         <button type="button" className="btn-submit" onClick={handleSubmit} disabled={status === "submitting"}>
           {status === "submitting" ? <span className="spinner" /> : <>Send Request ✓</>}
         </button>
       </div>
+    </div>
+  );
+}
+
+function FallbackScreen({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="success-screen">
+      <div style={{ fontSize: 56, marginBottom: 20 }}>💬</div>
+      <h1 className="success-title" style={{ color: "#1a2b5e" }}>Something went wrong</h1>
+      <p className="success-subtitle">
+        Reply to our text with what you need and we will take care of it.
+      </p>
+      <button
+        onClick={onRetry}
+        style={{ marginTop: 8, padding: "12px 28px", background: "#f97316", color: "white", border: "none", borderRadius: 10, fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
+      >
+        Try again
+      </button>
     </div>
   );
 }
