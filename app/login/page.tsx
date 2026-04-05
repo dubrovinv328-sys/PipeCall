@@ -139,6 +139,7 @@ export default function LoginPage() {
           animation: fadeInLeft 0.9s cubic-bezier(.22,1,.36,1) 0.12s both;
         }
         .headline span { color: #f97316; }
+        @media (max-width: 767px) { .headline { margin-top: 80px; } }
 
         .tagline {
           font-size: 16px;
