@@ -82,9 +82,9 @@ export default function LoginPage() {
           position: fixed;
           inset: 0;
           z-index: 0;
-          background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=85');
+          background-image: url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1920&q=85');
           background-size: cover;
-          background-position: center 40%;
+          background-position: center 60%;
         }
         .bg-photo::after {
           content: '';
