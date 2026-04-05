@@ -53,8 +53,7 @@ async function compressImage(file: File, maxMB = 1): Promise<File> {
       const scale = Math.sqrt(maxBytes / file.size);
       width = Math.round(width * scale);
       height = Math.round(height * scale);
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = width; canvas.height = height;
       canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
       canvas.toBlob(
         (blob) => { if (!blob) return reject(new Error("Compression failed")); resolve(new File([blob], file.name, { type: "image/jpeg" })); },
@@ -64,6 +63,24 @@ async function compressImage(file: File, maxMB = 1): Promise<File> {
     img.onerror = reject;
     img.src = url;
   });
+}
+
+/* ── WeKatch K-mark — adapts to dark/light context ── */
+function WeKatchMark({ light = false }: { light?: boolean }) {
+  const stroke = light ? "#1a2b5e" : "white";
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+      <svg width="32" height="32" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="7" y="4" width="6" height="30" rx="2.5" fill={stroke}/>
+        <path d="M13 19 L30 4 L37 4 L37 9 L19 21 Z" fill={stroke}/>
+        <path d="M13 19 L30 34 L37 34 L37 29 L19 17 Z" fill={stroke}/>
+        <circle cx="14" cy="19" r="5.5" fill="#f97316"/>
+      </svg>
+      <span style={{ fontSize: 17, fontWeight: 700, color: light ? "#1a2b5e" : "white", letterSpacing: "-0.3px", lineHeight: 1, fontFamily: "system-ui, sans-serif" }}>
+        We<span style={{ fontWeight: 800, color: "#f97316" }}>Katch</span>
+      </span>
+    </div>
+  );
 }
 
 function StepIndicator({ current, light }: { current: number; light?: boolean }) {
@@ -89,12 +106,7 @@ function StepIndicator({ current, light }: { current: number; light?: boolean })
 function Step1({ onNext }: { onNext: (issueId: string) => void }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [showError, setShowError] = useState(false);
-
-  const handleContinue = () => {
-    if (!selected) { setShowError(true); return; }
-    onNext(selected);
-  };
-
+  const handleContinue = () => { if (!selected) { setShowError(true); return; } onNext(selected); };
   return (
     <div className="step-content">
       <div className="step-header">
@@ -282,15 +294,11 @@ function Step4({ leadId, formData, onBack }: { leadId: string; formData: FormDat
       }).eq("id", leadId);
       if (error) throw error;
       setStatus("success");
-    } catch (err) {
-      console.error("Submit error:", err);
-      setStatus("error");
-    }
+    } catch (err) { console.error("Submit error:", err); setStatus("error"); }
   };
 
   const selectedIssue = ISSUE_CATEGORIES.find((c) => c.id === formData.issueId);
   const selectedTime = TIME_OPTIONS.find((t) => t.id === formData.timePreference);
-
   if (status === "success") return <SuccessScreen />;
 
   return (
@@ -300,36 +308,12 @@ function Step4({ leadId, formData, onBack }: { leadId: string; formData: FormDat
         <p className="step-subtitle" style={{ color: "#64748b" }}>Double-check your details before sending</p>
       </div>
       <div className="summary-card">
-        <div className="summary-row">
-          <span className="summary-key">Issue</span>
-          <span className="summary-val">{selectedIssue?.emoji} {selectedIssue?.label}</span>
-        </div>
-        {formData.description && (
-          <div className="summary-row">
-            <span className="summary-key">Description</span>
-            <span className="summary-val summary-desc">{formData.description}</span>
-          </div>
-        )}
-        {formData.photoPaths && formData.photoPaths.length > 0 && (
-          <div className="summary-row">
-            <span className="summary-key">Photos</span>
-            <span className="summary-val">{formData.photoPaths.length} attached</span>
-          </div>
-        )}
-        <div className="summary-row">
-          <span className="summary-key">Timing</span>
-          <span className="summary-val">{selectedTime?.emoji} {selectedTime?.label}</span>
-        </div>
-        {formData.name && (
-          <div className="summary-row">
-            <span className="summary-key">Name</span>
-            <span className="summary-val">{formData.name}</span>
-          </div>
-        )}
-        <div className="summary-row">
-          <span className="summary-key">Phone</span>
-          <span className="summary-val">{formData.phone}</span>
-        </div>
+        <div className="summary-row"><span className="summary-key">Issue</span><span className="summary-val">{selectedIssue?.emoji} {selectedIssue?.label}</span></div>
+        {formData.description && <div className="summary-row"><span className="summary-key">Description</span><span className="summary-val summary-desc">{formData.description}</span></div>}
+        {formData.photoPaths && formData.photoPaths.length > 0 && <div className="summary-row"><span className="summary-key">Photos</span><span className="summary-val">{formData.photoPaths.length} attached</span></div>}
+        <div className="summary-row"><span className="summary-key">Timing</span><span className="summary-val">{selectedTime?.emoji} {selectedTime?.label}</span></div>
+        {formData.name && <div className="summary-row"><span className="summary-key">Name</span><span className="summary-val">{formData.name}</span></div>}
+        <div className="summary-row"><span className="summary-key">Phone</span><span className="summary-val">{formData.phone}</span></div>
       </div>
       {status === "error" && <p className="error-msg">Something went wrong. Please try again.</p>}
       <div className="step-footer">
@@ -374,14 +358,11 @@ export default function IntakePage() {
     const trackStart = async () => {
       try {
         await supabase.from("events").insert({
-          lead_id: leadId,
-          business_id: null,
+          lead_id: leadId, business_id: null,
           event_type: "intake_started",
           event_data: { started_at: new Date().toISOString() },
         });
-      } catch (err) {
-        console.error("Failed to track intake_started:", err);
-      }
+      } catch (err) { console.error("Failed to track intake_started:", err); }
     };
     trackStart();
   }, [leadId]);
@@ -398,8 +379,7 @@ export default function IntakePage() {
           --success: #22c55e; --radius: 16px; --radius-sm: 10px; --blue: #2563eb;
         }
         html, body { height: 100%; font-family: system-ui, sans-serif; font-size: 16px; background: #0d0f14; }
-        
-        /* Wrapper — centered on desktop */
+
         .intake-wrapper { min-height: 100svh; display: flex; flex-direction: column; max-width: 560px; margin: 0 auto; background: #0d0f14; color: #f0f2f7; }
         .intake-wrapper.light-mode { background: #ffffff; color: #111827; }
         @media (min-width: 768px) {
@@ -410,10 +390,8 @@ export default function IntakePage() {
 
         /* Top bar */
         .top-bar { display: flex; align-items: center; gap: 10px; padding: 20px 24px 0; }
-        .top-bar-logo { width: 36px; height: 36px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-        .light-mode .top-bar-logo { background: var(--blue); }
-        .top-bar-name { font-size: 16px; font-weight: 700; flex: 1; }
-        .top-bar-lead { font-size: 12px; color: var(--text-muted); background: var(--surface-2); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); }
+        .top-bar-brand { display: flex; align-items: center; gap: 9px; flex: 1; flex-shrink: 0; }
+        .top-bar-lead { font-size: 12px; color: var(--text-muted); background: var(--surface-2); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); white-space: nowrap; }
         .light-mode .top-bar-lead { background: #f1f5f9; color: #64748b; border-color: #e2e8f0; }
 
         /* Step indicator */
@@ -440,7 +418,6 @@ export default function IntakePage() {
         .step-subtitle { margin-top: 6px; font-size: 14px; color: var(--text-muted); }
         .light-mode .step-subtitle { color: #64748b; }
 
-        /* Issue grid — 2 cols mobile, 4 cols desktop */
         .issue-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         @media (min-width: 768px) { .issue-grid { grid-template-columns: repeat(4, 1fr); } }
         .issue-card { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 20px 12px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); cursor: pointer; text-align: center; transition: all 0.18s; -webkit-tap-highlight-color: transparent; min-height: 110px; touch-action: manipulation; }
@@ -457,11 +434,9 @@ export default function IntakePage() {
         .card-check { position: absolute; top: 8px; right: 10px; font-size: 12px; color: var(--accent); font-weight: 700; }
         .issue-card.urgent .card-check { color: var(--urgent); }
 
-        /* Desktop two-col layout for steps 2 & 3 */
         .desktop-two-col { display: flex; flex-direction: column; gap: 0; }
         @media (min-width: 768px) { .desktop-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; } }
 
-        /* Fields */
         .field-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
         .field-label { font-size: 14px; font-weight: 600; }
         .field-optional { font-size: 12px; font-weight: 400; color: var(--text-muted); margin-left: 6px; }
@@ -478,7 +453,6 @@ export default function IntakePage() {
         .field-hint { font-size: 12px; color: var(--text-muted); }
         .validation-error { font-size: 13px; color: #f87171; font-weight: 500; margin-top: 2px; }
 
-        /* Photos */
         .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .photo-thumb { position: relative; aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden; background: var(--surface-2); }
         .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
@@ -488,7 +462,6 @@ export default function IntakePage() {
         .photo-add-icon { font-size: 22px; }
         .photo-add-label { font-size: 11px; color: var(--text-muted); }
 
-        /* Time options */
         .time-options { display: flex; flex-direction: column; gap: 10px; }
         .time-option { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; text-align: left; transition: all 0.18s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; width: 100%; }
         .time-option:hover { border-color: rgba(59,183,255,0.3); }
@@ -508,7 +481,6 @@ export default function IntakePage() {
         .time-option.urgent.selected .time-radio { color: var(--urgent); }
         .light-mode .time-option.selected .time-radio { color: var(--blue); }
 
-        /* Confirm page */
         .confirm-page { background: #fff; color: #111827; }
         .confirm-title { color: #111827; }
         .summary-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; }
@@ -519,7 +491,6 @@ export default function IntakePage() {
         .summary-desc { font-weight: 400; line-height: 1.5; }
         .error-msg { color: #ef4444; font-size: 14px; margin-bottom: 12px; text-align: center; }
 
-        /* Buttons */
         .step-footer { padding: 24px 0 32px; margin-top: auto; display: flex; gap: 10px; }
         .btn-primary { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 17px 24px; background: var(--accent); color: #000; font-size: 16px; font-weight: 700; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.18s; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         .btn-primary:hover { background: #5bc4ff; }
@@ -534,7 +505,6 @@ export default function IntakePage() {
         .spinner { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Success */
         .success-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; background: #fff; text-align: center; }
         .checkmark-wrap { position: relative; width: 100px; height: 100px; margin-bottom: 28px; }
         .checkmark-circle { width: 100%; height: 100%; }
@@ -547,12 +517,16 @@ export default function IntakePage() {
       `}</style>
 
       <div className={`intake-wrapper ${isConfirm ? "light-mode" : ""}`}>
+        {/* Top bar — WeKatch logo */}
         <div className="top-bar">
-          <div className="top-bar-logo">🔧</div>
-          <span className="top-bar-name">Service Request</span>
+          <div className="top-bar-brand">
+            <WeKatchMark light={isConfirm} />
+          </div>
           {leadId && <span className="top-bar-lead">#{leadId.slice(0, 8).toUpperCase()}</span>}
         </div>
+
         <StepIndicator current={currentStep} light={isConfirm} />
+
         {currentStep === 0 && <Step1 onNext={(issueId) => { setFormData((p) => ({ ...p, issueId })); setCurrentStep(1); }} />}
         {currentStep === 1 && <Step2 leadId={leadId} onNext={(data) => { setFormData((p) => ({ ...p, ...data })); setCurrentStep(2); }} onBack={() => setCurrentStep(0)} />}
         {currentStep === 2 && <Step3 initialPhone={formData.phone} onNext={(data) => { setFormData((p) => ({ ...p, ...data })); setCurrentStep(3); }} onBack={() => setCurrentStep(1)} />}
