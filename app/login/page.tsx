@@ -198,7 +198,7 @@ export default function LoginPage() {
           gap: 10px;
           margin-bottom: 40px;
         }
-        @media (max-width: 767px) { .mobile-logo { display: flex; } }
+        @media (max-width: 767px) { .mobile-logo { display: none; } }
         .mobile-logo-text {
           font-size: 22px;
           font-weight: 700;
